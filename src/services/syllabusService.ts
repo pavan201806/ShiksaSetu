@@ -8,10 +8,14 @@ import class3Math from '../data/syllabus/class_3/mathematics.json';
 import class3Science from '../data/syllabus/class_3/science.json';
 import class3Language from '../data/syllabus/class_3/language.json';
 
+import { getGeneratedWorksheets } from './database';
+
 export interface Lesson {
   id: string;
   title: string;
   content: string;
+  santaliContent?: string;
+  isGenerated?: boolean;
 }
 
 export interface Chapter {
@@ -66,4 +70,42 @@ const SYLLABUS_REGISTRY: Record<string, SubjectSyllabus> = {
 export function getSyllabusData(classId: number, subjectId: string): SubjectSyllabus | null {
   const key = `${classId}_${subjectId.toLowerCase()}`;
   return SYLLABUS_REGISTRY[key] || null;
+}
+
+/**
+ * Dynamically retrieves the subject syllabus and merges any offline-generated
+ * worksheets stored in SQLite under an "✨ AI Practice Worksheets" chapter.
+ */
+export async function getMergedSyllabus(
+  classId: number,
+  subjectId: string
+): Promise<SubjectSyllabus | null> {
+  const baseSyllabus = getSyllabusData(classId, subjectId);
+  if (!baseSyllabus) return null;
+
+  try {
+    const offlineWorksheets = await getGeneratedWorksheets(classId, subjectId);
+    if (offlineWorksheets && offlineWorksheets.length > 0) {
+      const generatedChapter: Chapter = {
+        id: `ai_worksheets_${classId}_${subjectId}`,
+        title: '✨ AI Bilingual Practice Worksheets',
+        lessons: offlineWorksheets.map((ws, idx) => ({
+          id: ws.id,
+          title: ws.title || `Worksheet ${idx + 1}: ${ws.topic}`,
+          content: ws.english_content,
+          santaliContent: ws.santali_content,
+          isGenerated: true,
+        })),
+      };
+
+      return {
+        ...baseSyllabus,
+        chapters: [...baseSyllabus.chapters, generatedChapter],
+      };
+    }
+  } catch (err) {
+    console.warn('[Syllabus] Failed to load offline generated worksheets:', err);
+  }
+
+  return baseSyllabus;
 }

@@ -1,0 +1,146 @@
+[
+  {
+    "id": "pb_1",
+    "category": "Greetings",
+    "english": "Good morning children, welcome to class!",
+    "hindi": "शुभ प्रभात बच्चों, कक्षा में आपका स्वागत है!",
+    "santali": "ᱡᱚᱦᱟᱨ ᱜᱤᱫᱽᱨᱟᱹ, ᱪᱟᱱᱟᱪ ᱛᱮ ᱥᱟᱹᱜᱩᱱ ᱫᱟᱨᱟᱢ! (Good morning children, welcome to class!)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_1.mp3"
+  },
+  {
+    "id": "pb_2",
+    "category": "Greetings",
+    "english": "Please sit down quietly in your places.",
+    "hindi": "कृपया अपनी जगह पर शांति से बैठ जाएं।",
+    "santali": "ᱟᱯᱮᱭᱟᱜ ᱴᱷᱟᱶ ᱨᱮ ᱛᱷᱤᱨ ᱠᱟᱛᱮ ᱫᱩᱲᱩᱵ ᱯᱮ (Please sit down quietly in your places)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_2.mp3"
+  },
+  {
+    "id": "pb_3",
+    "category": "Instructions",
+    "english": "Open your notebook and take out your pencil.",
+    "hindi": "अपनी नोटबुक खोलें और पेंसिल निकालें।",
+    "santali": "ᱟᱢᱟᱜ ᱠᱷᱟᱛᱟ ᱡᱷᱤᱡᱽ ᱢᱮ ᱟᱨ ᱯᱮᱱᱥᱤᱞ ᱚᱰᱚᱠ ᱢᱮ (Open your notebook and take out pencil)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_3.mp3"
+  },
+  {
+    "id": "pb_4",
+    "category": "Instructions",
+    "english": "Please listen carefully to what I am explaining.",
+    "hindi": "कृपया ध्यान से सुनें कि मैं क्या समझा रहा हूँ।",
+    "santali": "ᱢᱚᱱᱮ ᱮᱢ ᱠᱟᱛᱮ ᱟᱧᱡᱚᱢ ᱢᱮ ᱪᱮᱫ ᱤᱧ ᱵᱩᱡᱷᱟᱹᱣ ᱮᱫᱟ (Listen carefully to what is explained)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_1.mp3"
+  },
+  {
+    "id": "pb_5",
+    "category": "Discipline",
+    "english": "Keep quiet and maintain silence in the classroom.",
+    "hindi": "शांत रहें और कक्षा में शांति बनाए रखें।",
+    "santali": "ᱪᱟᱱᱟᱪ ᱨᱮ ᱛᱷᱤᱨ ᱛᱟᱦᱮᱸᱱ ᱯᱮ (Maintain silence in the classroom)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_2.mp3"
+  },
+  {
+    "id": "pb_6",
+    "category": "Discipline",
+    "english": "Raise your hand if you know the answer.",
+    "hindi": "यदि आपको उत्तर पता है तो अपना हाथ उठाएं।",
+    "santali": "ᱡᱩᱫᱤ ᱛᱮᱞᱟᱢ ᱵᱟᱰᱟᱭᱟ ᱠᱷᱟᱱ ᱛᱤ ᱛᱩᱞ ᱢᱮ (Raise your hand if you know the answer)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_3.mp3"
+  },
+  {
+    "id": "pb_7",
+    "category": "Blackboard",
+    "english": "Look at the blackboard carefully.",
+    "hindi": "श्यामपट्ट की ओर ध्यान से देखें।",
+    "santali": "ᱵᱚᱨᱰ ᱥᱮᱫ ᱢᱚᱱᱮ ᱮᱢ ᱠᱟᱛᱮ ᱠᱚᱭᱚᱜᱽ ᱢᱮ (Look carefully at the blackboard)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_1.mp3"
+  },
+  {
+    "id": "pb_8",
+    "category": "Blackboard",
+    "english": "Come forward and write the answer on the board.",
+    "hindi": "आगे आएं और बोर्ड पर उत्तर लिखें।",
+    "santali": "ᱞᱟᱦᱟ ᱦᱤᱡᱩᱜ ᱢᱮ ᱟᱨ ᱵᱚᱨᱰ ᱨᱮ ᱛᱮᱞᱟ ᱚᱞ ᱢᱮ (Come forward and write answer on board)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_2.mp3"
+  },
+  {
+    "id": "pb_9",
+    "category": "Learning",
+    "english": "Read this sentence aloud after me.",
+    "hindi": "मेरे बाद इस वाक्य को जोर से पढ़ें।",
+    "santali": "ᱤᱧ ᱛᱟᱭᱚᱢ ᱱᱚᱣᱟ ᱟᱹᱭᱟᱹᱛ ᱨᱟᱦᱟ ᱛᱮ ᱯᱟᱲᱦᱟᱣ ᱢᱮ (Read this sentence aloud after me)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_3.mp3"
+  },
+  {
+    "id": "pb_10",
+    "category": "Learning",
+    "english": "Write these numbers one to ten in your book.",
+    "hindi": "अपनी किताब में एक से दस तक ये अंक लिखें।",
+    "santali": "ᱟᱢᱟᱜ ᱯᱚᱛᱚᱵ ᱨᱮ ᱢᱤᱫ ᱠᱷᱚᱱ ᱜᱮᱞ ᱮᱞᱠᱷᱟ ᱚᱞ ᱢᱮ (Write numbers one to ten)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_1.mp3"
+  },
+  {
+    "id": "pb_11",
+    "category": "Encouragement",
+    "english": "Very good! You did great work today.",
+    "hindi": "बहुत अच्छा! आज आपने बहुत बढ़िया काम किया।",
+    "santali": "ᱟᱹᱰᱤ ᱵᱷᱟᱹᱜᱤ! ᱛᱮᱦᱮᱧ ᱟᱢ ᱟᱹᱰᱤ ᱱᱟᱯᱟᱭ ᱠᱟᱹᱢᱤ ᱠᱮᱫᱟ (Very good, you did great work)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_2.mp3"
+  },
+  {
+    "id": "pb_12",
+    "category": "Encouragement",
+    "english": "Do not be afraid, try again once more.",
+    "hindi": "डरो मत, एक बार फिर कोशिश करो।",
+    "santali": "ᱟᱞᱚᱢ ᱵᱚᱛᱚᱨᱚᱜ-ᱟ, ᱟᱨ ᱢᱤᱫ ᱫᱷᱟᱣ ᱠᱩᱨᱩᱢᱩᱴᱩᱭ ᱢᱮ (Do not fear, try once more)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_3.mp3"
+  },
+  {
+    "id": "pb_13",
+    "category": "Questions",
+    "english": "Did all of you understand this chapter?",
+    "hindi": "क्या आप सभी ने यह पाठ समझ लिया?",
+    "santali": "ᱪᱮᱫ ᱟᱯᱮ ᱥᱟᱱᱟᱢ ᱱᱚᱣᱟ ᱯᱟᱴᱷ ᱵᱩᱡᱷᱟᱹᱣ ᱠᱮᱫᱟ? (Did all of you understand this lesson?)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_1.mp3"
+  },
+  {
+    "id": "pb_14",
+    "category": "Questions",
+    "english": "Does anyone have any question or doubt?",
+    "hindi": "क्या किसी का कोई प्रश्न या संदेह है?",
+    "santali": "ᱡᱟᱦᱟᱸᱭᱟᱜ ᱪᱮᱫ ᱠᱩᱠᱞᱤ ᱢᱮᱱᱟᱜ-ᱟ? (Does anyone have any questions?)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_2.mp3"
+  },
+  {
+    "id": "pb_15",
+    "category": "Closing",
+    "english": "Pack your school bags and stand in a line.",
+    "hindi": "अपने स्कूल बैग पैक करें और एक कतार में खड़े हों।",
+    "santali": "ᱟᱯᱮᱭᱟᱜ ᱡᱷᱚᱞᱟ ᱥᱟᱯᱲᱟᱣ ᱯᱮ ᱟᱨ ᱛᱷᱟᱨ ᱨᱮ ᱛᱤᱸᱜᱩᱱ ᱯᱮ (Pack bags and stand in line)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_3.mp3"
+  },
+  {
+    "id": "pb_16",
+    "category": "Closing",
+    "english": "Thank you students, see you tomorrow!",
+    "hindi": "धन्यवाद बच्चों, कल मिलते हैं!",
+    "santali": "ᱥᱟᱨᱦᱟᱣ ᱯᱟᱹᱴᱷᱩᱣᱟᱹ ᱠᱚ, ᱜᱟᱯᱟ ᱵᱚᱱ ᱧᱟᱯᱟᱢᱟ! (Thank you students, see you tomorrow!)",
+    "script": "Ol Chiki",
+    "audioFile": "scenario_1.mp3"
+  }
+]

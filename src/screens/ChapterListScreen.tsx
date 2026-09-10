@@ -1,8 +1,21 @@
 import React, { useState, useCallback } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  Alert,
+} from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { getSyllabusData, Chapter, Lesson } from '../services/syllabusService';
-import { getAllLessonProgress } from '../services/database';
+import {
+  getAllLessonProgress,
+  getGeneratedWorksheets,
+  deleteGeneratedWorksheet,
+  GeneratedWorksheet,
+} from '../services/database';
 
 interface Props {
   navigation: any;
@@ -19,15 +32,46 @@ export const ChapterListScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const syllabus = getSyllabusData(classId, subjectId);
   const [progressMap, setProgressMap] = useState<Record<string, { completed: boolean; last_opened_at: string }>>({});
+  const [worksheets, setWorksheets] = useState<GeneratedWorksheet[]>([]);
 
-  // Reload progress whenever screen comes into focus
+  const loadData = useCallback(() => {
+    getAllLessonProgress()
+      .then((map) => setProgressMap(map))
+      .catch((err) => console.warn('Failed to load lesson progress:', err));
+
+    getGeneratedWorksheets(classId, subjectId)
+      .then((list) => setWorksheets(list))
+      .catch((err) => console.warn('Failed to load worksheets:', err));
+  }, [classId, subjectId]);
+
+  // Reload progress and worksheets whenever screen comes into focus
   useFocusEffect(
     useCallback(() => {
-      getAllLessonProgress()
-        .then((map) => setProgressMap(map))
-        .catch((err) => console.warn('Failed to load lesson progress:', err));
-    }, [])
+      loadData();
+    }, [loadData])
   );
+
+  const handleDeleteWorksheet = (id: string, title: string) => {
+    Alert.alert(
+      'Delete Worksheet',
+      `Are you sure you want to delete "${title}" from offline storage?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteGeneratedWorksheet(id);
+              loadData();
+            } catch (err) {
+              Alert.alert('Error', 'Failed to delete worksheet.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   // Compute stats
   let totalLessons = 0;
@@ -88,6 +132,92 @@ export const ChapterListScreen: React.FC<Props> = ({ navigation, route }) => {
             <View style={[styles.progressBarFill, { width: `${completionPercentage}%` }]} />
           </View>
         </View>
+
+        {/* AI Worksheet Generator Action Card */}
+        <TouchableOpacity
+          style={styles.aiActionCard}
+          onPress={() =>
+            navigation.navigate('GenerateWorksheet', {
+              classId,
+              className,
+              subjectId,
+              subjectName,
+            })
+          }
+          activeOpacity={0.85}
+        >
+          <View style={styles.aiActionLeft}>
+            <View style={styles.aiSparkleBadge}>
+              <Text style={styles.aiSparkleIcon}>✨</Text>
+            </View>
+            <View style={styles.aiActionTextContainer}>
+              <Text style={styles.aiActionTitle}>Generate AI Bilingual Worksheet</Text>
+              <Text style={styles.aiActionSub}>
+                Create custom FLN worksheets in English & Ol Chiki (ᱚᱞ ᱪᱤᱠᱤ)
+              </Text>
+            </View>
+          </View>
+          <View style={styles.aiActionArrow}>
+            <Text style={styles.aiActionArrowText}>Create →</Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Offline Saved AI Worksheets Section */}
+        {worksheets.length > 0 && (
+          <View style={styles.generatedSectionCard}>
+            <View style={styles.generatedSectionHeader}>
+              <View>
+                <Text style={styles.generatedSectionTag}>AI PRACTICE REPOSITORY</Text>
+                <Text style={styles.generatedSectionTitle}>
+                  Saved Worksheets ({worksheets.length})
+                </Text>
+              </View>
+              <View style={styles.offlineBadgeSmall}>
+                <Text style={styles.offlineBadgeSmallText}>💾 SQLite Stored</Text>
+              </View>
+            </View>
+
+            <View style={styles.lessonsContainer}>
+              {worksheets.map((ws, wIndex) => (
+                <View key={ws.id} style={styles.worksheetItemRow}>
+                  <TouchableOpacity
+                    style={styles.worksheetItemContent}
+                    onPress={() =>
+                      handleOpenLesson('AI Bilingual Worksheets', {
+                        id: ws.id,
+                        title: ws.title,
+                        content: ws.english_content,
+                        santaliContent: ws.santali_content,
+                        isGenerated: true,
+                      })
+                    }
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.worksheetBadge}>
+                      <Text style={styles.worksheetBadgeText}>WS{wIndex + 1}</Text>
+                    </View>
+                    <View style={styles.lessonTextContainer}>
+                      <Text style={styles.lessonTitle} numberOfLines={1}>
+                        {ws.title}
+                      </Text>
+                      <Text style={styles.lessonSnippet} numberOfLines={1}>
+                        Topic: {ws.topic}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.deleteWorksheetButton}
+                    onPress={() => handleDeleteWorksheet(ws.id, ws.title)}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Text style={styles.deleteWorksheetIcon}>🗑️</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
 
         {!syllabus || syllabus.chapters.length === 0 ? (
           <View style={styles.emptyState}>
@@ -359,5 +489,150 @@ const styles = StyleSheet.create({
     color: '#2563eb',
     fontWeight: '700',
     fontSize: 13,
+  },
+  aiActionCard: {
+    backgroundColor: '#1e40af',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    elevation: 3,
+    shadowColor: '#1e40af',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  aiActionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  aiSparkleBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  aiSparkleIcon: {
+    fontSize: 18,
+  },
+  aiActionTextContainer: {
+    flex: 1,
+  },
+  aiActionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#ffffff',
+  },
+  aiActionSub: {
+    fontSize: 11,
+    color: '#bfdbfe',
+    marginTop: 2,
+  },
+  aiActionArrow: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+  },
+  aiActionArrowText: {
+    color: '#1e40af',
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  generatedSectionCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 18,
+    padding: 18,
+    marginBottom: 20,
+    borderWidth: 1.5,
+    borderColor: '#93c5fd',
+    elevation: 2,
+  },
+  generatedSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 14,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f1f5f9',
+  },
+  generatedSectionTag: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#2563eb',
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+  generatedSectionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0f172a',
+  },
+  offlineBadgeSmall: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  offlineBadgeSmallText: {
+    color: '#15803d',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  worksheetItemRow: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  worksheetItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 8,
+  },
+  worksheetBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: '#dbeafe',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  worksheetBadgeText: {
+    color: '#1d4ed8',
+    fontWeight: '800',
+    fontSize: 11,
+  },
+  worksheetTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0f172a',
+  },
+  worksheetTopic: {
+    fontSize: 11,
+    color: '#64748b',
+    marginTop: 2,
+  },
+  deleteWorksheetButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#fee2e2',
+  },
+  deleteWorksheetIcon: {
+    fontSize: 14,
   },
 });

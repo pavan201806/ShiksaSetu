@@ -1,112 +1,182 @@
-import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { getLastSyncTime } from '../services/database';
 
 interface Props {
   navigation: any;
 }
 
 export const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  const [lastSyncText, setLastSyncText] = useState<string>('Local Mode');
+
+  useFocusEffect(
+    useCallback(() => {
+      getLastSyncTime().then((time) => {
+        if (time) {
+          const date = new Date(time);
+          setLastSyncText(`Synced ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`);
+        } else {
+          setLastSyncText('Offline SQLite');
+        }
+      });
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Header Bar */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.headerSubtitle}>TEACHER MANAGEMENT DASHBOARD</Text>
-            <Text style={styles.headerTitle}>ShikshaSetu</Text>
+        {/* Brand Header Banner */}
+        <View style={styles.heroCard}>
+          <View style={styles.heroTopRow}>
+            <View style={styles.logoBadge}>
+              <Text style={styles.logoBadgeText}>SIH 2026 PROTOTYPE</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.settingsIconBtn}
+              onPress={() => navigation.navigate('Settings')}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.settingsIcon}>⚙️</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.settingsButton}
-            onPress={() => navigation.navigate('Settings')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.settingsIcon}>⚙️</Text>
-          </TouchableOpacity>
-        </View>
 
-        {/* System Stats Bar */}
-        <View style={styles.statsCard}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>Class 1-3</Text>
-            <Text style={styles.statLabel}>Active Syllabus</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>Offline</Text>
-            <Text style={styles.statLabel}>Storage Status</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>Dev-Client</Text>
-            <Text style={styles.statLabel}>Native Engine</Text>
+          <Text style={styles.heroTitle}>ShikshaSetu</Text>
+          <Text style={styles.heroSubtitle}>शिक्षा सेतु • Multilingual Educator Bridge</Text>
+          <Text style={styles.heroTagline}>
+            Empowering primary school teachers with offline bilingual curriculum & on-device voice intelligence.
+          </Text>
+
+          {/* Quick Metrics Bar */}
+          <View style={styles.metricsBar}>
+            <View style={styles.metricItem}>
+              <Text style={styles.metricValue}>Class 1–3</Text>
+              <Text style={styles.metricLabel}>Active Grades</Text>
+            </View>
+            <View style={styles.metricDivider} />
+            <View style={styles.metricItem}>
+              <Text style={styles.metricValue}>Bilingual</Text>
+              <Text style={styles.metricLabel}>English + Santali</Text>
+            </View>
+            <View style={styles.metricDivider} />
+            <View style={styles.metricItem}>
+              <Text style={styles.metricValue}>{lastSyncText}</Text>
+              <Text style={styles.metricLabel}>Engine Status</Text>
+            </View>
           </View>
         </View>
 
         {/* Section Heading */}
-        <Text style={styles.sectionHeader}>Core Administrator Modules</Text>
+        <View style={styles.sectionHeaderRow}>
+          <Text style={styles.sectionHeading}>Teacher Classroom Modules</Text>
+          <View style={styles.onlinePill}>
+            <Text style={styles.onlinePillText}>● OFFLINE FIRST</Text>
+          </View>
+        </View>
 
-        {/* Two Large Entry Cards */}
+        {/* Module 1: Curriculum & Bilingual Worksheets */}
         <TouchableOpacity
-          style={[styles.moduleCard, styles.syllabusCard]}
+          style={[styles.moduleCard, styles.curriculumBorder]}
           onPress={() => navigation.navigate('ClassSelection')}
           activeOpacity={0.85}
         >
-          <View style={styles.cardHeaderRow}>
-            <View style={[styles.iconContainer, { backgroundColor: '#1e3a8a' }]}>
-              <Text style={styles.cardIcon}>📚</Text>
+          <View style={styles.cardTopRow}>
+            <View style={[styles.iconCircle, { backgroundColor: '#1e3a8a' }]}>
+              <Text style={styles.moduleIcon}>📚</Text>
             </View>
-
-            <View style={styles.badgeLabel}>
-              <Text style={styles.badgeLabelText}>CURRICULUM</Text>
+            <View style={[styles.cardTag, { backgroundColor: '#dbeafe' }]}>
+              <Text style={[styles.cardTagText, { color: '#1d4ed8' }]}>SYLLABUS & LESSONS</Text>
             </View>
           </View>
-          <Text style={styles.cardTitle}>Syllabus & Course Material</Text>
+
+          <Text style={styles.cardTitle}>Curriculum & Bilingual Worksheets</Text>
           <Text style={styles.cardDescription}>
-            Browse class-wise subjects (Mathematics, Science, Language), structured chapters, and offline lesson content for primary grades.
+            Explore Class 1 to 3 Mathematics, Science, and Language lessons. View interactive bilingual worksheets in English and Santali Ol Chiki with native audio playback.
           </Text>
+
           <View style={styles.cardActionRow}>
-            <Text style={[styles.cardActionText, { color: '#1e40af' }]}>Browse Syllabus →</Text>
+            <Text style={[styles.actionText, { color: '#1e40af' }]}>Browse Classes & Subjects →</Text>
           </View>
         </TouchableOpacity>
 
+        {/* Module 2: Classroom Voice Assistant */}
         <TouchableOpacity
-          style={[styles.moduleCard, styles.voiceCard]}
+          style={[styles.moduleCard, styles.voiceBorder]}
           onPress={() => navigation.navigate('VoiceAssistant')}
           activeOpacity={0.85}
         >
-          <View style={styles.cardHeaderRow}>
-            <View style={[styles.iconContainer, { backgroundColor: '#065f46' }]}>
-              <Text style={styles.cardIcon}>🎤</Text>
+          <View style={styles.cardTopRow}>
+            <View style={[styles.iconCircle, { backgroundColor: '#065f46' }]}>
+              <Text style={styles.moduleIcon}>🎤</Text>
             </View>
-
-            <View style={[styles.badgeLabel, { backgroundColor: '#dcfce7' }]}>
-              <Text style={[styles.badgeLabelText, { color: '#15803d' }]}>VOICE AI</Text>
+            <View style={[styles.cardTag, { backgroundColor: '#dcfce7' }]}>
+              <Text style={[styles.cardTagText, { color: '#15803d' }]}>VOICE AI ASSISTANT</Text>
             </View>
           </View>
+
           <Text style={styles.cardTitle}>Classroom Voice Assistant</Text>
           <Text style={styles.cardDescription}>
-            AI-assisted real-time speech translation, voice prompts, and multilingual lesson assistance for classroom teaching.
+            Push-to-hold speech recognition in Hindi (powered by offline Vosk ASR) translated automatically to Santali with teacher review, inline editing, and verified speech output.
           </Text>
+
           <View style={styles.cardActionRow}>
-            <Text style={[styles.cardActionText, { color: '#047857' }]}>Open Voice Assistant →</Text>
+            <Text style={[styles.actionText, { color: '#047857' }]}>Launch Voice Assistant →</Text>
           </View>
         </TouchableOpacity>
 
-        {/* Quick Settings Access Card */}
+        {/* Module 3: Teacher's Classroom Phrasebook */}
         <TouchableOpacity
-          style={styles.settingsRowCard}
-          onPress={() => navigation.navigate('Settings')}
-          activeOpacity={0.8}
+          style={[styles.moduleCard, styles.phrasebookBorder]}
+          onPress={() => navigation.navigate('Phrasebook')}
+          activeOpacity={0.85}
         >
-          <View style={styles.settingsRowLeft}>
-            <Text style={styles.settingsRowIcon}>🛡️</Text>
-            <View>
-              <Text style={styles.settingsRowTitle}>App Information & Settings</Text>
-              <Text style={styles.settingsRowSub}>Stark Dynamics • SIH 2026 Prototype</Text>
+          <View style={styles.cardTopRow}>
+            <View style={[styles.iconCircle, { backgroundColor: '#78350f' }]}>
+              <Text style={styles.moduleIcon}>💬</Text>
+            </View>
+            <View style={[styles.cardTag, { backgroundColor: '#fef3c7' }]}>
+              <Text style={[styles.cardTagText, { color: '#b45309' }]}>PHRASEBOOK</Text>
             </View>
           </View>
-          <Text style={styles.settingsRowArrow}>›</Text>
+
+          <Text style={styles.cardTitle}>Teacher&apos;s Classroom Phrasebook</Text>
+          <Text style={styles.cardDescription}>
+            16+ essential everyday classroom management phrases across Greetings, Discipline, Blackboard, and Encouragement. Tap any phrase to play native pronunciation aloud.
+          </Text>
+
+          <View style={styles.cardActionRow}>
+            <Text style={[styles.actionText, { color: '#b45309' }]}>Open Classroom Phrasebook →</Text>
+          </View>
         </TouchableOpacity>
+
+        {/* Module 4: Settings & Backend Synchronization */}
+        <TouchableOpacity
+          style={styles.settingsNavCard}
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.85}
+        >
+          <View style={styles.settingsNavLeft}>
+            <Text style={styles.settingsNavIcon}>🛡️</Text>
+            <View>
+              <Text style={styles.settingsNavTitle}>Offline Database & Cloud Sync</Text>
+              <Text style={styles.settingsNavSub}>FastAPI sync, teacher corrections queue & app information</Text>
+            </View>
+          </View>
+          <Text style={styles.settingsNavArrow}>→</Text>
+        </TouchableOpacity>
+
+        {/* Footer Credit */}
+        <View style={styles.footerInfo}>
+          <Text style={styles.footerTeam}>Developed by Stark Dynamics</Text>
+          <Text style={styles.footerMeta}>Smart India Hackathon 2026 • Offline Primary LMS</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -115,78 +185,131 @@ export const HomeScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#f8fafc',
   },
   scrollContent: {
-    padding: 20,
+    padding: 18,
+    paddingBottom: 32,
   },
-  header: {
+  heroCard: {
+    backgroundColor: '#0f172a',
+    borderRadius: 22,
+    padding: 22,
+    marginBottom: 24,
+    elevation: 6,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  heroTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
-    paddingTop: 8,
+    marginBottom: 14,
   },
-  headerSubtitle: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#2563eb',
-    letterSpacing: 1.1,
-  },
-  headerTitle: {
-    fontSize: 30,
-    fontWeight: '900',
-    color: '#0f172a',
-  },
-  settingsButton: {
-    backgroundColor: '#ffffff',
-    padding: 10,
-    borderRadius: 12,
+  logoBadge: {
+    backgroundColor: '#1e293b',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#cbd5e1',
-    elevation: 1,
+    borderColor: '#334155',
+  },
+  logoBadgeText: {
+    color: '#38bdf8',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+  settingsIconBtn: {
+    backgroundColor: '#1e293b',
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   settingsIcon: {
-    fontSize: 20,
+    fontSize: 18,
   },
-  statsCard: {
-    backgroundColor: '#0f172a',
-    borderRadius: 16,
-    padding: 16,
+  heroTitle: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: '#ffffff',
+    letterSpacing: 0.5,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#38bdf8',
+    marginTop: 2,
+    marginBottom: 8,
+  },
+  heroTagline: {
+    fontSize: 13,
+    color: '#94a3b8',
+    lineHeight: 19,
+    marginBottom: 18,
+  },
+  metricsBar: {
     flexDirection: 'row',
+    backgroundColor: '#1e293b',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
-  statItem: {
+  metricItem: {
     flex: 1,
     alignItems: 'center',
   },
-  statValue: {
-    color: '#38bdf8',
-    fontSize: 15,
+  metricValue: {
+    color: '#f8fafc',
+    fontSize: 13,
     fontWeight: '800',
-    marginBottom: 2,
   },
-  statLabel: {
+  metricLabel: {
     color: '#94a3b8',
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 9,
+    fontWeight: '700',
     textTransform: 'uppercase',
+    marginTop: 2,
   },
-  statDivider: {
+  metricDivider: {
     width: 1,
-    height: 28,
+    height: 24,
     backgroundColor: '#334155',
   },
-  sectionHeader: {
-    fontSize: 14,
-    fontWeight: '700',
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  sectionHeading: {
+    fontSize: 13,
+    fontWeight: '800',
     color: '#475569',
     textTransform: 'uppercase',
     letterSpacing: 0.8,
-    marginBottom: 14,
+  },
+  onlinePill: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  onlinePillText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#15803d',
+    letterSpacing: 0.5,
   },
   moduleCard: {
     backgroundColor: '#ffffff',
@@ -194,52 +317,57 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 18,
     borderWidth: 1.5,
-    borderColor: '#e2e8f0',
-    elevation: 2,
+    elevation: 4,
     shadowColor: '#0f172a',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
   },
-  syllabusCard: {
+  curriculumBorder: {
     borderColor: '#bfdbfe',
   },
-  voiceCard: {
+  voiceBorder: {
     borderColor: '#bbf7d0',
   },
-  cardHeaderRow: {
+  phrasebookBorder: {
+    borderColor: '#fde68a',
+  },
+  cardTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
-  iconContainer: {
+  iconCircle: {
     width: 48,
     height: 48,
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
   },
-  cardIcon: {
+  moduleIcon: {
     fontSize: 24,
   },
-  badgeLabel: {
-    backgroundColor: '#dbeafe',
+  cardTag: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
-  badgeLabelText: {
-    color: '#1d4ed8',
-    fontSize: 11,
+  cardTagText: {
+    fontSize: 10,
     fontWeight: '800',
     letterSpacing: 0.5,
   },
   cardTitle: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '800',
     color: '#0f172a',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   cardDescription: {
     fontSize: 13,
@@ -252,41 +380,63 @@ const styles = StyleSheet.create({
     borderTopColor: '#f1f5f9',
     paddingTop: 12,
   },
-  cardActionText: {
+  actionText: {
     fontSize: 14,
     fontWeight: '700',
   },
-  settingsRowCard: {
+  settingsNavCard: {
     backgroundColor: '#ffffff',
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#cbd5e1',
-    marginTop: 6,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#0f172a',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
   },
-  settingsRowLeft: {
+  settingsNavLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+    marginRight: 10,
   },
-  settingsRowIcon: {
+  settingsNavIcon: {
     fontSize: 24,
   },
-  settingsRowTitle: {
+  settingsNavTitle: {
     fontSize: 14,
     fontWeight: '700',
     color: '#0f172a',
   },
-  settingsRowSub: {
-    fontSize: 12,
+  settingsNavSub: {
+    fontSize: 11,
     color: '#64748b',
+    marginTop: 2,
   },
-  settingsRowArrow: {
-    fontSize: 22,
+  settingsNavArrow: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1e40af',
+  },
+  footerInfo: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  footerTeam: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  footerMeta: {
+    fontSize: 11,
     color: '#94a3b8',
-    fontWeight: 'bold',
+    marginTop: 2,
   },
 });
