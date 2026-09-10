@@ -30,7 +30,10 @@
     "plugins": [
       "expo-dev-client",
       "expo-sqlite",
-      "react-native-vosk"
+      [
+        "react-native-vosk",
+        { "models": ["./assets/model-hi-in"] }
+      ]
     ],
     "extra": {
       "eas": {
