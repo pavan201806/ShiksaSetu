@@ -1,0 +1,17 @@
+{
+  "class": 2,
+  "subject": "science",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "Plants Around Us",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "Types of Plants",
+          "content": "Plants can be trees, shrubs, herbs, climbers, or creepers. Trees have thick wooden trunks, while herbs have soft green stems."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "class": 3,
+  "subject": "language",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "Verbs and Action Words",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "Understanding Action Words",
+          "content": "Verbs describe actions. Words like run, jump, read, write, and sing show what a person or animal is doing."
+        }
+      ]
+    }
+  ]
+}

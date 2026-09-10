@@ -1,0 +1,17 @@
+{
+  "class": 2,
+  "subject": "language",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "Nouns and Naming Words",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "What is a Noun?",
+          "content": "A noun is the name of a person, place, animal, or thing. Examples: Rahul, Delhi, Elephant, Pencil."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "class": 2,
+  "subject": "mathematics",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "Addition and Subtraction",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "Adding Two-Digit Numbers",
+          "content": "Learn how to combine two numbers. For example, 12 + 15 = 27. Start by adding the ones column, then the tens column."
+        }
+      ]
+    }
+  ]
+}

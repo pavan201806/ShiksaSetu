@@ -1,0 +1,17 @@
+{
+  "class": 1,
+  "subject": "science",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "Living and Non-Living Things",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "Introduction to Living Things",
+          "content": "Living things can breathe, grow, move, eat food, and reproduce. Plants, animals, and humans are living things."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "class": 3,
+  "subject": "science",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "The Human Body",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "Sense Organs",
+          "content": "We have 5 sense organs: Eyes (seeing), Ears (hearing), Nose (smelling), Tongue (tasting), and Skin (touching)."
+        }
+      ]
+    }
+  ]
+}

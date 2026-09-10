@@ -1,0 +1,17 @@
+{
+  "class": 1,
+  "subject": "language",
+  "chapters": [
+    {
+      "id": "ch1",
+      "title": "Alphabets and Sounds",
+      "lessons": [
+        {
+          "id": "l1",
+          "title": "Vowels and Consonants",
+          "content": "Letters make sounds! Learn the basic vowels A, E, I, O, U and practice phonics with simple words like Cat, Dog, and Sun."
+        }
+      ]
+    }
+  ]
+}
