@@ -380,6 +380,14 @@ def generate_curated_fln_worksheet(class_id: int, subject: str, topic: str, cont
     }
 
 
+SUPPORTED_GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-2.0-flash-exp",
+    "gemini-2.5-pro",
+]
+
+
 def generate_gemini_worksheet(class_id: int, subject: str, topic: str, context: Optional[str] = None) -> Optional[Dict[str, str]]:
     """
     Invokes the Google Gemini API to generate a bilingual worksheet.
@@ -409,15 +417,21 @@ Return ONLY a valid JSON object without markdown fences, in this exact format:
 }}
 """
 
-    # Try modern google.genai
+    # 1. Primary: Official modern Google GenAI SDK (google-genai)
     try:
         from google import genai
+        from google.genai import types
+
         client = genai.Client(api_key=api_key)
-        for model_name in ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
+        for model_name in SUPPORTED_GEMINI_MODELS:
             try:
                 res = client.models.generate_content(
                     model=model_name,
-                    contents=prompt
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.3,
+                    ),
                 )
                 if res and res.text:
                     raw_text = res.text.strip()
@@ -426,37 +440,49 @@ Return ONLY a valid JSON object without markdown fences, in this exact format:
                         raw_text = re.sub(r"\n?```$", "", raw_text)
                     data = json.loads(raw_text.strip())
                     if "title" in data and "english_content" in data and "santali_content" in data:
+                        print(f"[GenAI] Successfully generated worksheet using model: {model_name}")
                         return {
                             "title": data["title"],
                             "english_content": data["english_content"],
                             "santali_content": data["santali_content"]
                         }
             except Exception as model_err:
-                print(f"[Gemini Client] Model {model_name} failed: {model_err}")
+                print(f"[GenAI] Model {model_name} failed: {model_err}")
                 continue
+    except ImportError as ie:
+        print(f"[GenAI] google-genai SDK not present, trying legacy: {ie}")
     except Exception as e:
-        print(f"[GenAI] Client initialization failed: {e}")
+        print(f"[GenAI] Client error: {e}")
 
-    # Fallback to legacy google.generativeai if available
+    # 2. Fallback: Legacy google-generativeai package if installed
     try:
         import google.generativeai as legacy_genai
         legacy_genai.configure(api_key=api_key)
-        model = legacy_genai.GenerativeModel("gemini-1.5-flash")
-        res = model.generate_content(prompt)
-        if res and res.text:
-            raw_text = res.text.strip()
-            if raw_text.startswith("```"):
-                raw_text = re.sub(r"^```(?:json)?\n?", "", raw_text)
-                raw_text = re.sub(r"\n?```$", "", raw_text)
-            data = json.loads(raw_text.strip())
-            if "title" in data and "english_content" in data and "santali_content" in data:
-                return {
-                    "title": data["title"],
-                    "english_content": data["english_content"],
-                    "santali_content": data["santali_content"]
-                }
+        for model_name in SUPPORTED_GEMINI_MODELS:
+            try:
+                model = legacy_genai.GenerativeModel(model_name)
+                res = model.generate_content(
+                    prompt,
+                    generation_config={"response_mime_type": "application/json"}
+                )
+                if res and res.text:
+                    raw_text = res.text.strip()
+                    if raw_text.startswith("```"):
+                        raw_text = re.sub(r"^```(?:json)?\n?", "", raw_text)
+                        raw_text = re.sub(r"\n?```$", "", raw_text)
+                    data = json.loads(raw_text.strip())
+                    if "title" in data and "english_content" in data and "santali_content" in data:
+                        print(f"[Legacy GenAI] Successfully generated worksheet using model: {model_name}")
+                        return {
+                            "title": data["title"],
+                            "english_content": data["english_content"],
+                            "santali_content": data["santali_content"]
+                        }
+            except Exception as legacy_model_err:
+                print(f"[Legacy GenAI] Model {model_name} failed: {legacy_model_err}")
+                continue
     except Exception as e2:
-        print(f"[Legacy GenAI] Generation failed: {e2}")
+        print(f"[Legacy GenAI] Fallback failed: {e2}")
 
     return None
 
