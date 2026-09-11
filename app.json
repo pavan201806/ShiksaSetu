@@ -38,7 +38,8 @@
           ]
         }
       ],
-      "./plugins/withDisableNewArch"
+      "expo-audio",
+      "expo-asset"
     ],
     "extra": {
       "eas": {

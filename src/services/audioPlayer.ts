@@ -1,4 +1,9 @@
-import { Audio, AVPlaybackStatus } from 'expo-av';
+import {
+  createAudioPlayer,
+  setAudioModeAsync,
+  AudioPlayer,
+  AudioStatus,
+} from 'expo-audio';
 
 // Map of bundled audio assets
 const STATIC_AUDIO_ASSETS: Record<string, any> = {
@@ -10,19 +15,20 @@ const STATIC_AUDIO_ASSETS: Record<string, any> = {
   'assets/audio/scenario_3.mp3': require('../../assets/audio/scenario_3.mp3'),
 };
 
-let currentSound: Audio.Sound | null = null;
+let currentSound: AudioPlayer | null = null;
 let currentSoundId: string | null = null;
+let currentSubscription: { remove: () => void } | null = null;
 
 /**
  * Initializes the audio subsystem for classroom playback.
  */
 export async function setupAudioMode(): Promise<void> {
   try {
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: false,
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      shouldDuckAndroid: true,
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: 'duckOthers',
+      allowsRecording: false,
+      shouldPlayInBackground: false,
     });
   } catch (err) {
     console.warn('[AudioPlayer] Failed to set audio mode:', err);
@@ -30,16 +36,16 @@ export async function setupAudioMode(): Promise<void> {
 }
 
 /**
- * Plays an audio asset or remote URI using expo-av.
+ * Plays an audio asset or remote URI using expo-audio.
  * Stops any existing playback before starting a new track.
  */
 export async function playAudio(
   source: string,
   onPlaybackFinished?: () => void,
   onError?: (err: any) => void
-): Promise<Audio.Sound | null> {
+): Promise<AudioPlayer | null> {
   try {
-    // 1. Stop and unload any previous sound
+    // 1. Stop and release any previous sound
     await stopAudio();
 
     await setupAudioMode();
@@ -53,25 +59,35 @@ export async function playAudio(
       soundSource = STATIC_AUDIO_ASSETS[cleanSource];
     } else if (STATIC_AUDIO_ASSETS[filename]) {
       soundSource = STATIC_AUDIO_ASSETS[filename];
-    } else if (cleanSource.startsWith('http://') || cleanSource.startsWith('https://') || cleanSource.startsWith('file://')) {
-      soundSource = { uri: cleanSource };
+    } else if (
+      cleanSource.startsWith('http://') ||
+      cleanSource.startsWith('https://') ||
+      cleanSource.startsWith('file://')
+    ) {
+      soundSource = cleanSource;
     } else {
       // Fallback default
       soundSource = STATIC_AUDIO_ASSETS['scenario_1.mp3'];
     }
 
-    const { sound } = await Audio.Sound.createAsync(
-      soundSource,
-      { shouldPlay: true },
-      (status: AVPlaybackStatus) => {
-        if (status.isLoaded) {
-          if (status.didJustFinish) {
+    const player = createAudioPlayer(soundSource);
+
+    const subscription = player.addListener(
+      'playbackStatusUpdate',
+      (status: AudioStatus) => {
+        if (status.didJustFinish) {
+          if (currentSound === player) {
             currentSound = null;
             currentSoundId = null;
-            sound.unloadAsync().catch(() => {});
-            if (onPlaybackFinished) {
-              onPlaybackFinished();
-            }
+          }
+          subscription.remove();
+          try {
+            player.remove();
+          } catch {
+            // Ignored
+          }
+          if (onPlaybackFinished) {
+            onPlaybackFinished();
           }
         } else if (status.error) {
           console.warn('[AudioPlayer] Playback error:', status.error);
@@ -80,9 +96,12 @@ export async function playAudio(
       }
     );
 
-    currentSound = sound;
+    currentSubscription = subscription;
+    currentSound = player;
     currentSoundId = source;
-    return sound;
+
+    player.play();
+    return player;
   } catch (err) {
     console.warn('[AudioPlayer] Failed to play audio:', err);
     if (onError) onError(err);
@@ -91,16 +110,20 @@ export async function playAudio(
 }
 
 /**
- * Stops and unloads the current playing sound.
+ * Stops and releases the current playing sound.
  */
 export async function stopAudio(): Promise<void> {
   try {
+    if (currentSubscription) {
+      currentSubscription.remove();
+      currentSubscription = null;
+    }
     if (currentSound) {
-      await currentSound.stopAsync();
-      await currentSound.unloadAsync();
+      currentSound.pause();
+      currentSound.remove();
     }
   } catch (err) {
-    // Ignored if already stopped or unloaded
+    // Ignored if already stopped or removed
   } finally {
     currentSound = null;
     currentSoundId = null;
