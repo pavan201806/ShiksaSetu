@@ -32,8 +32,13 @@
       "expo-sqlite",
       [
         "react-native-vosk",
-        { "models": ["./assets/model-hi-in"] }
-      ]
+        {
+          "models": [
+            "./assets/model-hi-in"
+          ]
+        }
+      ],
+      "./plugins/withDisableNewArch"
     ],
     "extra": {
       "eas": {
