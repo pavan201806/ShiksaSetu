@@ -1,257 +1,743 @@
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/sih-2026-dark.png">
+  <img src="docs/assets/sih-2026.png" alt="Smart India Hackathon 2026" width="430">
+</picture>
+
+<br><br>
+
 # ShikshaSetu (शिक्षा सेतु) 🌉📚
 
-> **Multilingual Educator Bridge & Offline Primary LMS**  
-> *Developed by Team Stark Dynamics for Smart India Hackathon (SIH) 2026*
+**AI-Powered Vernacular Pedagogy & Real-Time Translation for Mother-Tongue Primary Education**<br>
+*Bridging Languages | Building Brighter Classrooms*
+
+Smart India Hackathon 2026 · Problem Statement **SIH26042** · Theme **Smart Education**<br>
+Team **StarkDynamics** · Team ID **145690** · GMR Institute of Technology
+
+<br>
+
+![Platform](https://img.shields.io/badge/Platform-Android-3DDC84?logo=android&logoColor=white)
+![React Native](https://img.shields.io/badge/React_Native-Expo-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/Language-TypeScript-3178C6?logo=typescript&logoColor=white)
+![Offline](https://img.shields.io/badge/Architecture-Offline--First-149447)
+![Languages](https://img.shields.io/badge/Languages-Hindi%20%7C%20Santali%20%7C%20English-F48C22)
+![Backend](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)
+
+<br>
+
+<img src="docs/assets/architecture.png"
+     alt="ShikshaSetu multilingual education architecture"
+     width="100%">
+
+</div>
+
+<br>
+
+> **"Others translate words. ShikshaSetu builds lessons — offline, teacher-ready, in Santali."**
+
+---
+
+## 🎯 Problem Statement
+
+**Problem Statement ID:** SIH26042
+
+**Title:** *AI-Powered Vernacular Pedagogy and Real-Time Translation Tool for Mother Tongue-Based Primary Education*
+
+**Theme:** Smart Education  
+**Category:** Software
+
+Tribal children often learn best in their mother tongue, while teachers deployed in multilingual classrooms may primarily speak Hindi. This creates a language barrier in tribal primary classrooms, particularly where digital educational tools for languages such as **Ho, Mundari, and Santali** are limited.
+
+ShikshaSetu addresses this challenge through an AI-assisted Android application that enables teachers to access curriculum, communicate through bilingual voice interaction, and generate learning material in **Hindi and Santali**, while keeping core functionality available offline.
 
 ---
 
 ## 🌟 Overview
 
-**ShikshaSetu** is an offline-first mobile application and AI microservice ecosystem engineered to bridge language barriers in primary school classrooms (Classes 1–3) across tribal and multilingual belts of India. 
+**ShikshaSetu** is an **offline-first Android education platform** designed for multilingual primary classrooms.
 
-Many young learners entering primary school speak regional or tribal mother tongues such as **Santali (written in the Ol Chiki ᱚᱞ ᱪᱤᱠᱤ script)**, while state curriculums and instruction are often conducted in Hindi or English. ShikshaSetu empowers educators with:
-- **Offline Bilingual Curriculum & Interactive Worksheets** (English, Hindi, and Santali with native audio playback).
-- **On-Device Voice AI Assistant** (Push-to-talk speech recognition in Hindi via Vosk ASR translated into Santali with teacher review and audio generation).
-- **Classroom Phrasebook** for instant teacher-student communication.
-- **AI-Powered Bilingual Worksheet Generator** leveraging Google Gemini and curated Foundational Literacy and Numeracy (FLN) templates.
-- **Offline SQLite Database & Background Sync** to ensure 100% classroom uptime without internet dependencies.
+The current prototype focuses on:
 
----
+- Hindi ↔ Santali voice translation
+- Santali learning content using **Ol Chiki**
+- Classes 1–3 curriculum
+- Bilingual worksheets
+- Flashcards
+- Classroom phrasebook
+- Teacher-reviewed AI translation
+- Offline speech recognition
+- Offline audio playback
+- Local SQLite storage
+- Cloud synchronization when connectivity is available
 
-## 📸 Core Features
-
-### 1. 📚 Curriculum & Bilingual Worksheets
-- Full curriculum for **Class 1, Class 2, and Class 3** across Mathematics, Language, and Environmental Studies / Science.
-- Side-by-side view of lessons in **English and Santali (Ol Chiki)** with Romanized pronunciations.
-- Line-by-line and chapter-level **synchronized native audio playback**.
-
-### 2. 🎤 Classroom Voice Assistant (ASR + NMT + TTS)
-- **Push-to-hold speech recognition** in Hindi powered by on-device Vosk offline models.
-- Automatic neural/dictionary translation to Santali with confidence metrics.
-- **Teacher Review & Inline Editing**: Allows educators to review, edit, and fine-tune translations before playing audio aloud to students.
-- **Continuous Learning**: Saves teacher corrections into an offline queue that syncs back to the server for dataset refinement.
-
-### 3. 💬 Teacher's Classroom Management Phrasebook
-- 16+ essential everyday classroom phrases grouped into:
-  - 🌅 Greetings & Attendance
-  - 🤫 Discipline & Classroom Order
-  - 📝 Blackboard & Notebook Instructions
-  - 🌟 Encouragement & Motivation
-- Instant one-tap native audio pronunciation playback.
-
-### 4. 🤖 AI Bilingual Worksheet Generator
-- Generates interactive, level-appropriate worksheets for Classes 1–3 on any selected topic.
-- Powered by Google Gemini 2.5 API with automatic fallback to curated FLN worksheets when offline.
-- Dual-column format featuring English questions and corresponding Ol Chiki Santali translations.
-
-### 5. 🛡️ Offline-First Architecture & Cloud Synchronization
-- Fully functional without an active internet connection using local SQLite (`expo-sqlite`).
-- Periodic and manual synchronization with the FastAPI cloud backend to update syllabus records and upload teacher corrections.
+The solution is designed for **low-connectivity classrooms and low-cost Android devices**, with the technical approach targeting approximately **2 GB RAM** devices.
 
 ---
 
-## 🏗️ Architecture & Technology Stack
+## 🧩 How ShikshaSetu Addresses the Problem
 
-```mermaid
-graph TD
-    A[React Native / Expo Mobile App] -->|Reads / Writes| B[(Local SQLite Database)]
-    A -->|Offline Speech Recognition| C[Vosk ASR Engine]
-    A -->|Native Audio Playback| D[Expo Audio / Local Assets]
-    A -->|Sync & AI Generation| E[FastAPI Python Backend]
-    E -->|Curriculum & Endpoints| B
-    E -->|Generative AI Worksheets| F[Google Gemini API]
-    E -->|Teacher Corrections Store| G[(Backend Data Store)]
+```text
+                 TEACHER
+                    │
+                    │ Hindi Speech
+                    ▼
+             ┌──────────────┐
+             │   Vosk STT   │
+             └──────┬───────┘
+                    │
+                    │ Hindi Text
+                    ▼
+             ┌──────────────┐
+             │ IndicTrans2  │
+             └──────┬───────┘
+                    │
+                    │ Santali Text
+                    ▼
+             ┌──────────────┐
+             │  Teacher     │
+             │   Review     │
+             └──────┬───────┘
+                    │
+                    ▼
+             ┌──────────────┐
+             │ Santali TTS  │
+             │ Piper / VITS │
+             └──────┬───────┘
+                    │
+                    ▼
+                 STUDENT
+              Santali Speech
 ```
 
-### Mobile App (Frontend)
-- **Framework**: React Native 0.86, Expo SDK 57 (Development Client)
-- **Language**: TypeScript
-- **Styling**: NativeWind (Tailwind CSS v3) & Custom Design System
-- **Navigation**: React Navigation v7 (Native Stack)
-- **Offline Database**: `expo-sqlite`
-- **Audio Engine**: `expo-audio`, `expo-asset`
-- **Offline Speech-to-Text**: `react-native-vosk` (Hindi offline model `model-hi-in`)
-- **Animations**: `react-native-reanimated`
+The reverse direction is also part of the solution:
 
-### Backend Microservice
-- **Framework**: FastAPI (Python 3.10+)
-- **Server**: Uvicorn (ASGI)
-- **AI / LLM Integration**: Google Gemini API via `google-genai` / REST
-- **Validation**: Pydantic v2
-- **Data & Configuration**: Dotenv, CORS Middleware
+```text
+Santali Speech
+      ↓
+Santali STT
+      ↓
+Santali Text
+      ↓
+IndicTrans2
+      ↓
+Hindi Text
+      ↓
+Hindi TTS
+      ↓
+Hindi Speech
+```
+
+This creates a **bidirectional Hindi ↔ Santali voice communication pipeline**.
+
+---
+
+## ⚡ Real-Time Voice-to-Voice Translation
+
+The technical approach targets an end-to-end latency of **under 3 seconds**.
+
+The submission reports the following pipeline estimates:
+
+| Direction | Pipeline | Approx. End-to-End Time |
+| --- | --- | ---: |
+| Hindi → Santali | STT + Translation + TTS | **1.1–1.5 s** |
+| Santali → Hindi | STT + Translation + TTS | **1.6–2.3 s** |
+
+The system runs speech processing, translation and synthesis **on-device**, using lightweight/optimised models.
+
+---
+
+## 🧠 AI Model Pipeline
+
+### Speech-to-Text
+
+The prototype uses **Vosk** for offline Hindi speech recognition.
+
+```text
+Microphone
+    ↓
+Audio Capture
+    ↓
+Vosk STT
+    ↓
+Hindi / Santali Text
+```
+
+### Neural Translation
+
+**IndicTrans2** is used for Hindi ↔ Santali translation.
+
+```text
+Hindi Text
+    ↕
+IndicTrans2
+    ↕
+Santali Text
+```
+
+### Text-to-Speech
+
+The prototype uses offline TTS resources including **Piper / VITS** and fine-tuned voice resources for native-language speech.
+
+```text
+Text
+ ↓
+Text Normalisation
+ ↓
+Offline TTS
+ ↓
+Native Speech
+```
+
+---
+
+## 📚 Core Features
+
+### 1. Curriculum & Bilingual Learning
+
+The application provides curriculum content for:
+
+- **Class 1**
+- **Class 2**
+- **Class 3**
+
+Across subjects including:
+
+- Mathematics
+- Language
+- Environmental Studies / Science
+
+Learning content can be presented in bilingual form, including **English and Santali (Ol Chiki)** with Romanized pronunciation support.
+
+---
+
+### 2. 🎤 Classroom Voice Assistant
+
+Teachers can use push-to-talk voice interaction for classroom communication.
+
+Features include:
+
+- Offline speech recognition
+- Hindi → Santali translation
+- Santali → Hindi translation architecture
+- Teacher review before playback
+- Native-language audio generation/playback
+- Offline correction queue
+
+```text
+Teacher
+  │
+  ▼
+Speech
+  │
+  ▼
+Offline STT
+  │
+  ▼
+Translation
+  │
+  ▼
+Teacher Review
+  │
+  ▼
+TTS
+  │
+  ▼
+Student
+```
+
+---
+
+### 3. 💬 Classroom Phrasebook
+
+The classroom phrasebook provides commonly used teacher-student expressions.
+
+The prototype includes **16+ classroom phrases** covering areas such as:
+
+- Greetings & Attendance
+- Discipline & Classroom Order
+- Blackboard & Notebook Instructions
+- Encouragement & Motivation
+
+Each phrase can be played using native audio.
+
+---
+
+### 4. 🤖 AI Bilingual Worksheet Generator
+
+ShikshaSetu can generate curriculum-oriented worksheets for primary classes.
+
+The system combines:
+
+- Google Gemini
+- Curated FLN templates
+- Bilingual question generation
+- Santali translation
+- Teacher-oriented learning material
+
+When the online AI service is unavailable, curated content can continue to support the offline experience.
+
+---
+
+### 5. 📴 Offline-First Learning
+
+Core learning resources are stored locally so that classroom functionality does not depend on continuous internet connectivity.
+
+```text
+             SHIKSHASETU
+                  │
+      ┌───────────┼───────────┐
+      ▼           ▼           ▼
+  Curriculum   Voice       Audio
+      │        Pipeline      │
+      └───────────┼───────────┘
+                  ▼
+             SQLite DB
+                  │
+             When Online
+                  ▼
+           FastAPI Backend
+                  │
+       ┌──────────┼──────────┐
+       ▼          ▼          ▼
+   Curriculum   Sync      Analytics
+```
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+flowchart LR
+    T["👩‍🏫 Teacher"] --> A["ShikshaSetu Android App"]
+
+    A --> B["Local SQLite"]
+    A --> C["Offline STT"]
+    A --> D["Local Audio / TTS"]
+
+    A --> E["FastAPI Backend"]
+
+    E --> F["IndicTrans2 / AI Services"]
+    E --> G["Worksheet Generation"]
+    E --> H["Cloud Database"]
+
+    H -->|"Curriculum / Updates / Sync"| E
+    E -->|"Synchronised Data"| A
+
+    A --> S["📚 Lessons / Worksheets / Flashcards / Phrasebook"]
+```
+
+---
+
+## 🔄 Offline + Online Architecture
+
+ShikshaSetu separates **classroom operation** from **cloud synchronization**.
+
+### Offline Mode
+
+The application can work with:
+
+- Cached lessons
+- Local curriculum
+- Worksheets
+- Flashcards
+- Phrasebook
+- Local database
+- On-device AI models
+- Local audio resources
+
+### Online Mode
+
+When connectivity becomes available:
+
+```text
+Local Database
+      │
+      │ Sync
+      ▼
+Cloud Database
+      │
+      ├── Curriculum Updates
+      ├── New Learning Content
+      ├── Teacher Corrections
+      └── Analytics
+```
+
+This allows the application to remain useful in low-connectivity classrooms while still supporting centralized content management.
+
+---
+
+## 💾 Low-Resource AI & Memory Optimisation
+
+A major design constraint is operation on **low-end Android hardware**, targeting approximately **2 GB RAM**.
+
+The technical approach includes:
+
+- Quantized / optimised ONNX models
+- Dynamic model loading
+- Load-on-demand AI resources
+- Local inference
+- Memory-aware model management
+- Lightweight mobile application architecture
+
+The technical evaluation presented for the solution includes model memory measurements across the STT, translation and TTS pipeline.
+
+---
+
+## 🛠️ Technology Stack
+
+### Mobile Application
+
+| Component | Technology |
+| --- | --- |
+| Framework | React Native |
+| Runtime | Expo SDK |
+| Language | TypeScript |
+| Styling | NativeWind / Tailwind CSS |
+| Navigation | React Navigation |
+| Local Database | SQLite / expo-sqlite |
+| Audio | Expo Audio / local assets |
+| Offline ASR | Vosk |
+| AI Runtime | ONNX Runtime |
+
+### AI / ML
+
+| Component | Technology |
+| --- | --- |
+| Speech-to-Text | Vosk / Indic speech models |
+| Translation | IndicTrans2 |
+| Text-to-Speech | Piper / VITS |
+| Model Optimisation | Quantization / ONNX |
+| Worksheet Generation | Google Gemini + curated FLN templates |
+
+### Backend
+
+| Component | Technology |
+| --- | --- |
+| Framework | FastAPI |
+| Language | Python |
+| Server | Uvicorn |
+| Validation | Pydantic |
+| AI Integration | Google Gemini |
+| Database / Storage | Backend data store |
+| Sync | REST API |
 
 ---
 
 ## 📂 Project Structure
 
-```
+```text
 ShikshaSetu/
-├── android/                     # Android native project configuration
-├── assets/                      # App icons, splash screens, and audio clips
-│   ├── audio/                   # Pre-recorded audio assets (.wav, .mp3)
-│   └── model-hi-in/             # Vosk offline Hindi ASR model bundle
-├── backend/                     # FastAPI backend microservice
-│   ├── .env                     # Backend environment configuration
-│   ├── data.py                  # Static syllabus & voice scenario seeds
-│   ├── main.py                  # API endpoints, sync, and Gemini generator
-│   ├── README.md                # Backend specific documentation
-│   └── requirements.txt         # Python dependencies
+│
+├── android/                       # Android native configuration
+│
+├── assets/                        # App assets and AI resources
+│   ├── audio/                     # Audio assets
+│   └── model-hi-in/               # Vosk Hindi ASR model
+│
+├── backend/                       # FastAPI backend
+│   ├── data.py                    # Curriculum / scenario data
+│   ├── main.py                    # API endpoints and AI services
+│   ├── README.md                  # Backend documentation
+│   └── requirements.txt           # Python dependencies
+│
 ├── src/
-│   ├── assets/                  # Frontend bundled asset mappings
-│   ├── components/              # Modular UI components (cards, audio controls)
-│   ├── data/                    # Local seed data (phrasebook, syllabus JSONs)
-│   │   ├── phrasebook.json      # Classroom phrasebook definitions
-│   │   └── syllabus/            # Class 1-3 curriculum JSON files
-│   ├── hooks/                   # Custom React hooks
-│   ├── navigation/              # AppNavigator and navigation type definitions
-│   ├── screens/                 # Application screen views
-│   │   ├── HomeScreen.tsx
-│   │   ├── ClassSelectionScreen.tsx
-│   │   ├── SubjectSelectionScreen.tsx
-│   │   ├── ChapterListScreen.tsx
-│   │   ├── LessonContentScreen.tsx
-│   │   ├── VoiceAssistantScreen.tsx
-│   │   ├── TranslationResultScreen.tsx
-│   │   ├── PhrasebookScreen.tsx
-│   │   ├── GenerateWorksheetScreen.tsx
-│   │   └── SettingsScreen.tsx
-│   ├── services/                # Business logic, database, sync, & voice pipeline
-│   │   ├── api.ts               # HTTP client with Axios
-│   │   ├── audioPlayer.ts       # Sound playback wrapper
-│   │   ├── database.ts          # SQLite database schema and operations
-│   │   ├── syllabusService.ts   # Syllabus data provider
-│   │   ├── syncService.ts       # Background server sync & correction queue
-│   │   └── voicePipeline/       # Modular STT, Translator, and TTS pipeline
-│   └── types/                   # Shared TypeScript interfaces
-├── .env                         # Root app environment variables
-├── app.json                     # Expo configuration and native plugins
-├── package.json                 # Node dependencies and scripts
-├── tailwind.config.js           # NativeWind / Tailwind setup
-└── tsconfig.json                # TypeScript compiler configuration
+│   ├── assets/                    # Frontend assets
+│   ├── components/                # Reusable UI components
+│   ├── data/                      # Local seed data
+│   │   ├── phrasebook.json
+│   │   └── syllabus/
+│   ├── hooks/                     # Custom hooks
+│   ├── navigation/                # Navigation
+│   ├── screens/                   # Application screens
+│   ├── services/                  # Business logic and data services
+│   │   └── voicePipeline/         # STT / translation / TTS
+│   └── types/                     # Shared TypeScript types
+│
+├── app.json                       # Expo configuration
+├── package.json                   # Node dependencies
+├── tailwind.config.js             # NativeWind configuration
+└── tsconfig.json                  # TypeScript configuration
 ```
+
+---
+
+## 📱 Application Flow
+
+```text
+Splash
+  ↓
+Home / Dashboard
+  ↓
+Class Selection
+  ↓
+Subject Selection
+  ↓
+Chapter / Lesson List
+  ↓
+Lesson Content
+  ↓
+Bilingual Learning
+  ↓
+Audio / Voice Assistant
+  ↓
+Worksheets / Flashcards / Phrasebook
+```
+
+---
+
+## 🗣️ Supported Languages
+
+| Language | Script | Role |
+| --- | --- | --- |
+| **Santali** | Ol Chiki + Romanized | Primary target language |
+| **Hindi** | Devanagari | Source / teaching language |
+| **English** | Latin | Curriculum / baseline content |
+
+> The current prototype focuses on **Hindi ↔ Santali**, with English used for curriculum and learning content.
+
+---
+
+## 🔌 Backend API
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `GET` | `/` | API health and status |
+| `GET` | `/syllabus` | Classes and subjects |
+| `GET` | `/syllabus/{class_id}` | Curriculum for a class |
+| `GET` | `/lesson/{lesson_id}` | Lesson lookup |
+| `POST` | `/voice/process` | Speech processing |
+| `GET` | `/voice/demo/{scenario_id}` | Voice demo scenario |
+| `POST` | `/teacher/corrections` | Submit teacher corrections |
+| `GET` | `/teacher/corrections` | Retrieve corrections |
+| `POST` | `/worksheets/generate` | Generate worksheets |
+| `GET` | `/worksheets` | Retrieve worksheets |
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js**: v18.x or later
-- **npm** or **yarn**
-- **Python**: v3.10 or later (for backend)
-- **Android Studio & SDK** (for building Android APK / running Emulator)
-- **Expo CLI** (`npm install -g expo-cli`)
+
+- Node.js v18+
+- npm or yarn
+- Python 3.10+
+- Android Studio
+- Android SDK
+- Expo development environment
+
+### Clone
+
+```bash
+git clone https://github.com/pavan201806/ShiksaSetu.git
+cd ShiksaSetu
+```
+
+### Install Mobile Dependencies
+
+```bash
+npm install
+```
+
+### Configure Mobile Environment
+
+Create `.env`:
+
+```env
+EXPO_PUBLIC_API_URL=http://<YOUR_LOCAL_IP_OR_SERVER>:8000
+```
+
+For a physical Android device, use the development machine's LAN IP address or the deployed backend URL.
+
+### Run Android Development Build
+
+```bash
+npx expo run:android
+```
+
+Or start the Expo development server:
+
+```bash
+npx expo start
+```
 
 ---
 
-### 1. Mobile App Setup & Execution
+## 🐍 Backend Setup
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/pavan201806/ShiksaSetu.git
-   cd ShiksaSetu
-   ```
+```bash
+cd backend
+```
 
-2. **Install JavaScript dependencies**:
-   ```bash
-   npm install
-   ```
+### Windows
 
-3. **Configure Environment Variables**:
-   Create or edit `.env` in the root directory:
-   ```env
-   EXPO_PUBLIC_API_URL=http://<YOUR_LOCAL_IP_OR_SERVER>:8000
-   ```
-   *(Note: If running on a physical Android device or emulator, use your machine's LAN IP address or the deployed cloud backend URL).*
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
-4. **Run the App**:
-   - **For Development Client (Android with Vosk Native Module)**:
-     ```bash
-     npx expo run:android
-     ```
-   - **For Expo Dev Server**:
-     ```bash
-     npx expo start
-     ```
+### Linux / macOS
 
----
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 
-### 2. Backend Server Setup & Execution
+Configure:
 
-1. **Navigate to the `backend/` directory**:
-   ```bash
-   cd backend
-   ```
+```env
+GEMINI_API_KEY="your-gemini-api-key-here"
+```
 
-2. **Create and activate a virtual environment**:
-   ```bash
-   # Windows (PowerShell)
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
+Start FastAPI:
 
-   # Linux / macOS
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+```bash
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
 
-3. **Install Python dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+API documentation:
 
-4. **Configure Backend Environment Variables**:
-   Create or edit `backend/.env`:
-   ```env
-   GEMINI_API_KEY="your-gemini-api-key-here"
-   ```
+```text
+http://localhost:8000/docs
+```
 
-5. **Start the FastAPI server**:
-   ```bash
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
+ReDoc:
 
-6. **Verify Server Status**:
-   - Root Status: [http://localhost:8000/](http://localhost:8000/)
-   - Interactive Swagger API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
-   - ReDoc Documentation: [http://localhost:8000/redoc](http://localhost:8000/redoc)
+```text
+http://localhost:8000/redoc
+```
 
 ---
 
-## 📡 Backend API Endpoints
+## 📊 Feasibility & Viability
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/` | API Health & status check |
-| `GET` | `/syllabus` | Overview of all classes and available subjects |
-| `GET` | `/syllabus/{class_id}` | Detailed curriculum, chapters, and lessons for Class 1, 2, or 3 |
-| `GET` | `/lesson/{lesson_id}` | Lookup a specific lesson by ID across subjects |
-| `POST` | `/voice/process` | Speech processing endpoint (ASR + Translation payload) |
-| `GET` | `/voice/demo/{scenario_id}` | Returns pre-seeded voice scenarios for testing |
-| `POST` | `/teacher/corrections` | Submits teacher translation corrections batch from mobile app |
-| `GET` | `/teacher/corrections` | Retrieves submitted corrections for model fine-tuning |
-| `POST` | `/worksheets/generate` | Generates bilingual worksheets using Gemini AI / FLN templates |
-| `GET` | `/worksheets` | Retrieves all previously generated worksheets |
+The proposed architecture is designed around:
 
----
-
-## 🗣️ Supported Languages & Scripts
-
-| Language | ISO Code | Native Script | Support Level |
-| :--- | :--- | :--- | :--- |
-| **Santali** | `sat` | Ol Chiki (ᱚᱞ ᱪᱤᱠᱤ) + Romanized | Primary Target (TTS, Worksheets, Phrasebook) |
-| **Hindi** | `hi` | Devanagari (हिन्दी) | Source Language (Vosk ASR, Dual Display) |
-| **English** | `en` | Latin Script | Medium of Instruction & Baseline Worksheets |
+| Challenge | Approach |
+| --- | --- |
+| Low-cost Android devices | React Native + lightweight models |
+| Large AI models | Quantization + ONNX optimisation |
+| No continuous internet | On-device AI + SQLite |
+| Hindi ↔ Santali translation | IndicTrans2 |
+| Teacher workload | AI-generated learning material |
+| Language variation | Domain-specific bilingual data + teacher review |
+| Battery constraints | Low-power inference and dynamic loading |
+| Deployment cost | Open-source software + low-cost hardware |
 
 ---
 
-## 👥 Contributors & Acknowledgements
+## 🌱 Impact
 
-Developed with ❤️ by **Team Stark Dynamics** for the **Smart India Hackathon (SIH) 2026**.
+ShikshaSetu aims to provide:
 
-- **Organization**: Ministry of Education / Smart India Hackathon
-- **Focus Area**: Foundational Literacy & Numeracy (FLN), Multilingual Classroom Inclusion, Tribal Education.
+### 1. Mother-Tongue Learning
+
+Students can access learning resources in Santali, supporting more inclusive classroom participation.
+
+### 2. Learning Continuity
+
+Core lessons, worksheets, flashcards and language resources remain available in low-connectivity environments.
+
+### 3. Reduced Language Barrier
+
+Hindi-speaking teachers can communicate with Santali-speaking students through the bilingual voice pipeline.
+
+### 4. Faster Lesson Preparation
+
+AI-assisted worksheets and learning materials can reduce manual preparation effort.
+
+### 5. Low-End Device Accessibility
+
+Optimised models and dynamic loading target Android devices with approximately **2 GB RAM**.
+
+### 6. Scalable Education Infrastructure
+
+Cloud synchronization can provide curriculum updates and analytics while preserving offline classroom functionality.
+
+---
+
+## 📈 Future Scope
+
+Potential extensions include:
+
+- Additional tribal and regional Indian languages
+- More Santali speech datasets
+- Improved bidirectional speech translation
+- Fully offline translation models
+- Additional native-language TTS voices
+- Expanded Class 1–3 curriculum coverage
+- More efficient quantization
+- Improved dynamic model management
+- Broader teacher-correction datasets
+- Large-scale classroom deployment and field validation
+
+---
+
+## 🔬 Research & References
+
+The solution is informed by:
+
+- UNESCO — PALASH & Mother Tongue Education
+- JEPC — Jharkhand MTB-MLE implementation
+- NEP 2020 — Foundational Literacy Guidelines
+- Bhashini — National Language Technology Mission
+- IndicTrans2 — Low-Resource Translation Research
+
+The project is positioned against existing language and education technologies including:
+
+- Adi-Vaani
+- Bhashini
+- AI4Bharat
+- Sarvam AI
+
+The intended differentiation is the combination of **Santali coverage, Hindi ↔ Santali translation, offline operation, teacher-oriented UI, educational content generation, and NIPUN/PALASH-aligned learning**.
+
+---
+
+## 👥 Team
+
+<div align="center">
+
+### StarkDynamics
+
+**GMR Institute of Technology (GMRIT)**  
+Rajam, Andhra Pradesh, India
+
+**Team ID: 145690**
+
+| Role | Member |
+| --- | --- |
+| Team Leader | **A Pavankumar** |
+| Team Member | **Karthikeyan Srinivas** |
+| Team Member | **P Bharat Kumar** |
+| Team Member | **M Bharath Kumar** |
+| Team Member | **K Gunasri** |
+| Team Member | **K Kalyani** |
+
+**Smart India Hackathon 2026**
+
+</div>
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [MIT License](file:///f:/SIH/ShiksaSetu/LICENSE).
+This project is licensed under the **MIT License**.
+
+See the repository `LICENSE` file for the complete license text.
+
+---
+
+<div align="center">
+
+<br>
+
+**ShikshaSetu — Bridging Languages | Building Brighter Classrooms**
+
+<br>
+
+**Team StarkDynamics · Smart India Hackathon 2026 · GMR Institute of Technology**
+
+</div>
