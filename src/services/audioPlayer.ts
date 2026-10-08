@@ -13,6 +13,12 @@ const STATIC_AUDIO_ASSETS: Record<string, any> = {
   'assets/audio/scenario_1.mp3': require('../../assets/audio/scenario_1.mp3'),
   'assets/audio/scenario_2.mp3': require('../../assets/audio/scenario_2.mp3'),
   'assets/audio/scenario_3.mp3': require('../../assets/audio/scenario_3.mp3'),
+  'hindi_scenario_1.mp3': require('../../assets/audio/hindi_scenario_1.mp3'),
+  'hindi_scenario_2.mp3': require('../../assets/audio/hindi_scenario_2.mp3'),
+  'hindi_scenario_3.mp3': require('../../assets/audio/hindi_scenario_3.mp3'),
+  'assets/audio/hindi_scenario_1.mp3': require('../../assets/audio/hindi_scenario_1.mp3'),
+  'assets/audio/hindi_scenario_2.mp3': require('../../assets/audio/hindi_scenario_2.mp3'),
+  'assets/audio/hindi_scenario_3.mp3': require('../../assets/audio/hindi_scenario_3.mp3'),
 };
 
 let currentSound: AudioPlayer | null = null;

@@ -59,29 +59,64 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
     }
 
     setIsTestingUrl(true);
-    setUrlStatus(null);
+    setUrlStatus({ success: false, message: `Probing backend at ${urlToUse}...` });
 
-    const test = await testApiConnection(urlToUse);
+    const test = await testApiConnection(urlToUse, (msg) => {
+      setUrlStatus({ success: false, message: msg });
+    });
     setIsTestingUrl(false);
 
     if (test.success) {
-      const cleanUrl = setEffectiveApiUrl(urlToUse);
+      const cleanUrl = setEffectiveApiUrl(test.finalUrl || urlToUse);
       setServerUrl(cleanUrl);
       await setCustomApiUrl(cleanUrl);
-      setUrlStatus({ success: true, message: `Connected! Reachable at ${cleanUrl}` });
+      setUrlStatus({
+        success: true,
+        message: `Backend Connected ✓ HTTP ${test.status || 200} OK`,
+      });
 
       const health = await checkBackendHealth();
       setIsOnline(Boolean(health));
 
       Alert.alert(
         'Backend Connected ✓',
-        `Successfully reached FastAPI backend at:\n${cleanUrl}\n\nSaved to SQLite settings as active endpoint.`
+        `Successfully reached FastAPI backend at:\n${cleanUrl}\n\nStatus: HTTP ${test.status || 200} OK\nResponse: ${test.data?.app || 'Online'}\nElapsed: ${test.elapsedMs}ms\n\nSaved to local database as active endpoint.`
       );
     } else {
-      setUrlStatus({ success: false, message: test.error || 'Endpoint unreachable' });
+      const errorMsg = test.error || 'Endpoint unreachable';
+      setUrlStatus({
+        success: false,
+        message: `${test.status ? `[HTTP ${test.status}] ` : ''}${errorMsg}`,
+      });
+
+      const isCloud = urlToUse.includes('onrender.com') || urlToUse.startsWith('https://');
+      const troubleshooting = isCloud
+        ? `• Render Free Tier: If inactive, Render can take 30–50s to wake up on the first request. Tap "Retry" to try again.\n• Internet Connection: Ensure phone is connected to active Wi-Fi or mobile data.\n• Phone Date/Time: Ensure device time is set automatically (required for SSL handshake).`
+        : `• Physical Phone: Ensure phone & PC are on the same Wi-Fi network.\n• Android Emulator: Use http://10.0.2.2:8000.\n• Local Backend: Verify uvicorn is running: uvicorn main:app --host 0.0.0.0 --port 8000.`;
+
       Alert.alert(
         'Connection Failed ⚠️',
-        `Could not reach backend at ${urlToUse}.\n\nReason: ${test.error}\n\nTroubleshooting:\n• Physical Phone: Ensure phone & PC are on the same Wi-Fi. Use your computer's Wi-Fi IP (e.g. http://192.168.x.x:8000).\n• Android Emulator: Use http://10.0.2.2:8000.\n• Verify FastAPI is running: uvicorn main:app --host 0.0.0.0 --port 8000.`
+        `Could not reach backend.\n\nTested URL:\n${test.finalUrl || urlToUse}\n\n${test.status ? `HTTP Status: ${test.status}\n` : ''}Reason: ${errorMsg}\n\nTroubleshooting:\n${troubleshooting}`,
+        [
+          { text: 'Retry', onPress: () => handleTestAndSaveUrl(urlToUse) },
+          {
+            text: 'Save Anyway (Offline)',
+            onPress: async () => {
+              const cleanUrl = setEffectiveApiUrl(test.finalUrl || urlToUse);
+              setServerUrl(cleanUrl);
+              await setCustomApiUrl(cleanUrl);
+              setUrlStatus({
+                success: false,
+                message: `Saved offline: ${cleanUrl} (Will sync when online)`,
+              });
+              Alert.alert(
+                'Endpoint Saved Offline 💾',
+                `Backend URL set to:\n${cleanUrl}\n\nShikshaSetu will work offline and sync with this backend once connectivity is restored.`
+              );
+            },
+          },
+          { text: 'Cancel', style: 'cancel' },
+        ]
       );
     }
   };
@@ -163,7 +198,7 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 style={styles.endpointInput}
                 value={serverUrl}
                 onChangeText={setServerUrl}
-                placeholder="http://192.168.1.5:8000"
+                placeholder="https://shiksasetu.onrender.com"
                 placeholderTextColor="#94a3b8"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -206,11 +241,13 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.presetLabel}>Quick Network Presets:</Text>
             <View style={styles.presetRow}>
               <TouchableOpacity
-                style={styles.presetChip}
-                onPress={() => handleApplyPreset('http://127.0.0.1:8000')}
+                style={[styles.presetChip, { backgroundColor: '#dbeafe', borderColor: '#93c5fd' }]}
+                onPress={() => handleApplyPreset('https://shiksasetu.onrender.com')}
                 activeOpacity={0.7}
               >
-                <Text style={styles.presetChipText}>127.0.0.1 (Localhost)</Text>
+                <Text style={[styles.presetChipText, { color: '#1d4ed8', fontWeight: '800' }]}>
+                  ☁️ Render (Production)
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -219,6 +256,14 @@ export const SettingsScreen: React.FC<Props> = ({ navigation }) => {
                 activeOpacity={0.7}
               >
                 <Text style={styles.presetChipText}>10.0.2.2 (Android Emu)</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.presetChip}
+                onPress={() => handleApplyPreset('http://127.0.0.1:8000')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.presetChipText}>127.0.0.1 (Localhost)</Text>
               </TouchableOpacity>
 
               <TouchableOpacity

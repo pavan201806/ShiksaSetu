@@ -37,7 +37,12 @@ export type RootStackParamList = {
     sourceContent?: string;
   };
   VoiceAssistant: undefined;
-  TranslationResult: { hindiTranscript: string };
+  TranslationResult: {
+    hindiTranscript?: string;
+    sourceTranscript?: string;
+    direction?: 'hi-to-sat' | 'sat-to-hi';
+    scenarioIndex?: number;
+  };
   Settings: undefined;
   Phrasebook: undefined;
 };

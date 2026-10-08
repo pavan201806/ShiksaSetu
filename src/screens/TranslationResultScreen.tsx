@@ -10,21 +10,22 @@ import {
   TextInput,
   Alert,
 } from 'react-native';
-import { MockTranslator } from '../services/voicePipeline/mockTranslator';
-import { RecordedAudioTTS } from '../services/voicePipeline/recordedAudioTTS';
-import { Translator, SpeechSynthesizer } from '../services/voicePipeline/interfaces';
+import {
+  getTranslatorForDirection,
+  getTTSForDirection,
+  VoiceDirection,
+} from '../services/voicePipeline/voicePipeline';
 import { playAudio, stopAudio } from '../services/audioPlayer';
 import { saveTeacherCorrection } from '../services/database';
-
-// Pluggable AI Service Instances (swap with real neural models when ready)
-const defaultTranslator: Translator = new MockTranslator();
-const defaultTTS: SpeechSynthesizer = new RecordedAudioTTS(0);
 
 interface Props {
   navigation: any;
   route: {
     params: {
-      hindiTranscript: string;
+      hindiTranscript?: string;
+      sourceTranscript?: string;
+      direction?: VoiceDirection;
+      scenarioIndex?: number;
     };
   };
 }
@@ -38,8 +39,16 @@ type PipelineStep =
   | 'error';
 
 export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) => {
-  const hindiTranscript =
-    route.params?.hindiTranscript || 'कोई आवाज नहीं पहचानी गई (No speech recognized)';
+  const direction: VoiceDirection = route.params?.direction || 'hi-to-sat';
+  const isHindiToSantali = direction === 'hi-to-sat';
+  const scenarioIndex = route.params?.scenarioIndex ?? 0;
+
+  const sourceTranscript =
+    route.params?.sourceTranscript ||
+    route.params?.hindiTranscript ||
+    (isHindiToSantali
+      ? 'कोई आवाज नहीं पहचानी गई (No speech recognized)'
+      : 'ᱵᱟᱝ ᱟᱸᱡᱚᱢ ᱞᱮᱱᱟ (No speech recognized)');
 
   const [step, setStep] = useState<PipelineStep>('translating');
   const [originalTranslatedText, setOriginalTranslatedText] = useState<string>('');
@@ -57,7 +66,8 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
     async function runInitialTranslation() {
       try {
         if (isMounted) setStep('translating');
-        const translationResult = await defaultTranslator.translate(hindiTranscript);
+        const translator = getTranslatorForDirection(direction);
+        const translationResult = await translator.translate(sourceTranscript);
         if (!isMounted) return;
 
         setOriginalTranslatedText(translationResult.translatedText);
@@ -82,7 +92,7 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
       isMounted = false;
       stopAudio();
     };
-  }, [hindiTranscript]);
+  }, [sourceTranscript, direction]);
 
   // Handler for saving edited text in review mode
   const handleSaveEdit = () => {
@@ -106,19 +116,26 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
 
       // If teacher edited original model output, persist to SQLite teacher_corrections table
       if (finalText !== originalTranslatedText && !wasCorrectionSaved) {
-        await saveTeacherCorrection(hindiTranscript, originalTranslatedText, finalText);
+        const hindiVal = isHindiToSantali ? sourceTranscript : finalText;
+        const santaliOriginalVal = isHindiToSantali ? originalTranslatedText : sourceTranscript;
+        const santaliCorrectedVal = isHindiToSantali ? finalText : sourceTranscript;
+        await saveTeacherCorrection(hindiVal, santaliOriginalVal, santaliCorrectedVal);
         setWasCorrectionSaved(true);
         console.log('[TranslationResultScreen] Teacher correction queued in SQLite');
       }
 
       // Step 2: Speech Synthesis
       setStep('synthesizing');
-      const ttsResult = await defaultTTS.synthesize(finalText);
+      const tts = getTTSForDirection(direction);
+      if ('setScenarioIndex' in tts) {
+        (tts as any).setScenarioIndex(scenarioIndex);
+      }
+      const ttsResult = await tts.synthesize(finalText);
       setAudioUri(ttsResult.audioUri);
 
-      // Step 3: Real native audio playback using expo-av
+      // Step 3: Real native audio playback using expo-audio
       setStep('playing');
-      console.log(`[TranslationResultScreen] Playing audio via expo-av: ${ttsResult.audioUri}`);
+      console.log(`[TranslationResultScreen] Playing audio via expo-audio: ${ttsResult.audioUri}`);
 
       await playAudio(
         ttsResult.audioUri,
@@ -132,7 +149,7 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
       );
     } catch (err: any) {
       console.warn('[TranslationResultScreen] Downstream pipeline error:', err);
-      setErrorMessage(err?.message || 'Failed to synthesize or play regional speech.');
+      setErrorMessage(err?.message || 'Failed to synthesize or play speech audio.');
       setStep('error');
     }
   };
@@ -160,25 +177,58 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
           }}
           activeOpacity={0.7}
         >
-          <Text style={styles.backButtonText}>← Record Another Prompt</Text>
+          <Text style={styles.backButtonText}>← Voice Assistant</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Classroom Translation</Text>
-        <Text style={styles.headerSub}>Teacher Review & Verified Speech Output</Text>
+        <Text style={styles.headerSub}>
+          {isHindiToSantali
+            ? 'Teacher Review & Verified Speech Output (Hindi ➔ Santali)'
+            : 'Teacher Review & Verified Speech Output (Santali ➔ Hindi)'}
+        </Text>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Section 1: Hindi Speech Recognized (Input) */}
+        {/* Direction Badge Banner */}
+        <View style={styles.directionBanner}>
+          <Text style={styles.directionBannerIcon}>
+            {isHindiToSantali ? '🇮🇳 ➔ 🌾' : '🌾 ➔ 🇮🇳'}
+          </Text>
+          <Text style={styles.directionBannerText}>
+            {isHindiToSantali
+              ? 'Direction: Hindi (Speaker) → Santali (Translation)'
+              : 'Direction: Santali (Student) → Hindi (Translation)'}
+          </Text>
+        </View>
+
+        {/* Section 1: Source Speech Recognized (Input) */}
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
             <View style={styles.badgeRow}>
-              <View style={[styles.badge, styles.hindiBadge]}>
-                <Text style={styles.hindiBadgeText}>HINDI (STT TRANSCRIPT)</Text>
+              <View
+                style={[
+                  styles.badge,
+                  isHindiToSantali ? styles.hindiBadge : styles.santaliBadge,
+                ]}
+              >
+                <Text
+                  style={
+                    isHindiToSantali ? styles.hindiBadgeText : styles.santaliBadgeText
+                  }
+                >
+                  {isHindiToSantali ? 'HINDI (STT TRANSCRIPT)' : 'SANTALI (STUDENT INPUT)'}
+                </Text>
               </View>
-              <Text style={styles.scriptLabel}>Script: Devanagari</Text>
+              <Text style={styles.scriptLabel}>
+                {isHindiToSantali ? 'Script: Devanagari' : 'Script: Ol Chiki'}
+              </Text>
             </View>
             <Text style={styles.statusDotIcon}>✓</Text>
           </View>
-          <Text style={styles.hindiText}>{hindiTranscript}</Text>
+          <Text
+            style={isHindiToSantali ? styles.hindiText : styles.santaliText}
+          >
+            {sourceTranscript}
+          </Text>
         </View>
 
         {/* Section 2: Automated Pipeline Status Banner */}
@@ -186,7 +236,11 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
           {step === 'translating' && (
             <View style={styles.statusInnerRow}>
               <ActivityIndicator size="small" color="#2563eb" />
-              <Text style={styles.statusText}>Translating Hindi to Santali (Ol Chiki)...</Text>
+              <Text style={styles.statusText}>
+                {isHindiToSantali
+                  ? 'Translating Hindi to Santali (Ol Chiki)...'
+                  : 'Translating Santali to Hindi (Devanagari)...'}
+              </Text>
             </View>
           )}
 
@@ -202,7 +256,11 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
           {step === 'synthesizing' && (
             <View style={styles.statusInnerRow}>
               <ActivityIndicator size="small" color="#059669" />
-              <Text style={styles.statusText}>Synthesizing Santali Speech Audio...</Text>
+              <Text style={styles.statusText}>
+                {isHindiToSantali
+                  ? 'Synthesizing Santali Speech Audio...'
+                  : 'Synthesizing Hindi Speech Audio...'}
+              </Text>
             </View>
           )}
 
@@ -210,7 +268,9 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
             <View style={[styles.statusInnerRow, styles.playingBar]}>
               <Text style={styles.audioWaveIcon}>🔊 ılılılllı</Text>
               <Text style={[styles.statusText, styles.playingText]}>
-                Playing Santali Audio Response (expo-av)...
+                {isHindiToSantali
+                  ? 'Playing Santali Audio Response (expo-audio)...'
+                  : 'Playing Hindi Audio Response (expo-audio)...'}
               </Text>
             </View>
           )}
@@ -234,17 +294,40 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
           )}
         </View>
 
-        {/* Section 3: Santali Translation & Teacher Review Card */}
+        {/* Section 3: Target Translation & Teacher Review Card */}
         {translatedText ? (
-          <View style={[styles.card, styles.santaliCard]}>
+          <View
+            style={[
+              styles.card,
+              isHindiToSantali ? styles.santaliCard : styles.hindiTargetCard,
+            ]}
+          >
             <View style={styles.cardHeaderRow}>
               <View style={styles.badgeRow}>
-                <View style={[styles.badge, styles.santaliBadge]}>
-                  <Text style={styles.santaliBadgeText}>SANTALI TRANSLATION</Text>
+                <View
+                  style={[
+                    styles.badge,
+                    isHindiToSantali ? styles.santaliBadge : styles.hindiBadge,
+                  ]}
+                >
+                  <Text
+                    style={
+                      isHindiToSantali
+                        ? styles.santaliBadgeText
+                        : styles.hindiBadgeText
+                    }
+                  >
+                    {isHindiToSantali ? 'SANTALI TRANSLATION' : 'HINDI TRANSLATION'}
+                  </Text>
                 </View>
                 {script && (
-                  <Text style={[styles.scriptLabel, { color: '#047857' }]}>
-                    Script: {script} (Ol Chiki)
+                  <Text
+                    style={[
+                      styles.scriptLabel,
+                      { color: isHindiToSantali ? '#047857' : '#1d4ed8' },
+                    ]}
+                  >
+                    Script: {script}
                   </Text>
                 )}
               </View>
@@ -264,7 +347,7 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
             {isEditing ? (
               <View style={styles.editorContainer}>
                 <Text style={styles.editorHint}>
-                  Edit translation if needed. Corrections are saved to local SQLite and synced to server.
+                  Edit translation if needed. Corrections are saved to local SQLite for continuous improvement.
                 </Text>
                 <TextInput
                   style={styles.textInput}
@@ -292,14 +375,18 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
                 </View>
               </View>
             ) : (
-              <Text style={styles.santaliText}>{translatedText}</Text>
+              <Text
+                style={isHindiToSantali ? styles.santaliText : styles.hindiText}
+              >
+                {translatedText}
+              </Text>
             )}
 
             {/* Correction saved banner */}
             {wasCorrectionSaved && (
               <View style={styles.correctionSavedBadge}>
                 <Text style={styles.correctionSavedText}>
-                  ✓ Teacher correction queued in local SQLite for backend sync
+                  ✓ Teacher correction queued in local SQLite database
                 </Text>
               </View>
             )}
@@ -308,11 +395,16 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
             {step === 'reviewing' && !isEditing && (
               <View style={styles.approvalActionContainer}>
                 <TouchableOpacity
-                  style={styles.approveButton}
+                  style={[
+                    styles.approveButton,
+                    !isHindiToSantali ? styles.approveButtonHindi : null,
+                  ]}
                   onPress={handleApproveAndSpeak}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.approveButtonText}>✓ Approve & Speak (expo-av) →</Text>
+                  <Text style={styles.approveButtonText}>
+                    ✓ Approve & Speak ({isHindiToSantali ? 'Santali' : 'Hindi'}) →
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -321,7 +413,9 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
             {audioUri && (step === 'playing' || step === 'completed') && (
               <View style={styles.audioMetaCard}>
                 <View style={styles.audioMetaHeader}>
-                  <Text style={styles.audioMetaTitle}>SYNTHESIZED AUDIO TRACK</Text>
+                  <Text style={styles.audioMetaTitle}>
+                    SYNTHESIZED {isHindiToSantali ? 'SANTALI' : 'HINDI'} AUDIO TRACK
+                  </Text>
                   {step === 'playing' && (
                     <View style={styles.liveIndicator}>
                       <Text style={styles.liveIndicatorText}>PLAYING NOW</Text>
@@ -354,7 +448,7 @@ export const TranslationResultScreen: React.FC<Props> = ({ navigation, route }) 
             }}
             activeOpacity={0.8}
           >
-            <Text style={styles.doneButtonText}>🎙️ Speak Another Prompt</Text>
+            <Text style={styles.doneButtonText}>🎙️ Speak / Test Another Prompt</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -402,6 +496,25 @@ const styles = StyleSheet.create({
     padding: 20,
     gap: 16,
   },
+  directionBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: '#ffffff',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+  },
+  directionBannerIcon: {
+    fontSize: 16,
+  },
+  directionBannerText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#334155',
+  },
   card: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -417,6 +530,10 @@ const styles = StyleSheet.create({
   santaliCard: {
     backgroundColor: '#f0fdf4',
     borderColor: '#bbf7d0',
+  },
+  hindiTargetCard: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#bfdbfe',
   },
   cardHeaderRow: {
     flexDirection: 'row',
@@ -591,6 +708,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  approveButtonHindi: {
+    backgroundColor: '#1d4ed8',
+    shadowColor: '#1d4ed8',
   },
   approveButtonText: {
     color: '#ffffff',

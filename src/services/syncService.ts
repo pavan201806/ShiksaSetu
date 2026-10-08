@@ -29,7 +29,7 @@ let isSyncing = false;
 export async function isNetworkConnected(): Promise<boolean> {
   try {
     const state = await NetInfo.fetch();
-    return Boolean(state.isConnected && (state.isInternetReachable ?? true));
+    return Boolean(state.isConnected);
   } catch (err) {
     console.warn('[SyncService] Failed to check network state:', err);
     return false;

@@ -1,3 +1,5 @@
+export type VoiceDirection = 'hi-to-sat' | 'sat-to-hi';
+
 export interface SpeechRecognizer {
   recognize(audioInput: any): Promise<{ text: string; confidence: number }>;
 }
@@ -16,4 +18,6 @@ export interface VoicePipelineResult {
   translatedText: string;
   script: string;
   audioUri: string;
+  direction?: VoiceDirection;
 }
+
