@@ -26,7 +26,7 @@ Team **StarkDynamics** · Team ID **145690** · GMR Institute of Technology
 
 <br>
 
-<img src="  Docs/assets/architecture.png"
+<img src="Docs/assets/architecture.png"
      alt="ShikshaSetu multilingual education architecture"
      width="100%">
 
