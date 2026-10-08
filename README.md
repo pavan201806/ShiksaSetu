@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/sih-2026-dark.png">
-  <img src="docs/assets/sih-2026.png" alt="Smart India Hackathon 2026" width="430">
+  <source media="(prefers-color-scheme: dark)" srcset="Docs/assets/sih-2026-dark.png">
+  <img src="Docs/assets/sih-2026.png" alt="Smart India Hackathon 2026" width="430">
 </picture>
 
 <br><br>
@@ -26,7 +26,7 @@ Team **StarkDynamics** · Team ID **145690** · GMR Institute of Technology
 
 <br>
 
-<img src="docs/assets/architecture.png"
+<img src="  Docs/assets/architecture.png"
      alt="ShikshaSetu multilingual education architecture"
      width="100%">
 
