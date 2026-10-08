@@ -13,7 +13,7 @@
 *Bridging Languages | Building Brighter Classrooms*
 
 Smart India Hackathon 2026 · Problem Statement **SIH26042** · Theme **Smart Education**<br>
-Team **StarkDynamics** · Team ID **145690** · GMR Institute of Technology
+Team **StarkDynamics** · Team ID **145690** .
 
 <br>
 
